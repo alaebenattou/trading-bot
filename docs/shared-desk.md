@@ -87,3 +87,5 @@ ruff check .
 ```
 
 The original TradingAgents documentation remains in [README.md](../README.md), and its Apache 2.0 license remains in [LICENSE](../LICENSE).
+
+For the deployed CloudLinux/cPanel host, see [eventy.click deployment](deployment-eventy.md). Passenger serves the site and `python -m tradingagents.web work` drains the queue from cron; run it from the application directory so it loads the correct private `.env`.

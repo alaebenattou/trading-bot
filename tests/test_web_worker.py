@@ -136,3 +136,32 @@ def test_timeout_reaps_running_child():
                 timeout=0.02,
             )
         assert launch.call_count == 1
+
+
+def test_shared_host_worker_recovers_jobs_and_restores_signal_handlers(tmp_path):
+    import signal
+
+    from tradingagents.web.worker import drain_queue
+
+    path = queued(tmp_path)
+    with connect(path) as db:
+        db.execute("UPDATE runs SET status='running'")
+    previous = signal.getsignal(signal.SIGTERM)
+    assert drain_queue(path)
+    assert row(path)["status"] == "failed"
+    assert signal.getsignal(signal.SIGTERM) == previous
+
+
+def test_shared_host_worker_does_not_interrupt_another_runner(tmp_path):
+    from pathlib import Path
+
+    from filelock import FileLock
+
+    from tradingagents.web.worker import drain_queue
+
+    path = queued(tmp_path)
+    with connect(path) as db:
+        db.execute("UPDATE runs SET status='running'")
+    with FileLock(str(Path(path).parent / "server.lock")):
+        assert not drain_queue(path)
+    assert row(path)["status"] == "running"

@@ -17,6 +17,7 @@ def main():
     )
     sub = parser.add_subparsers(dest="command", required=True)
     sub.add_parser("setup", help="Create or replace both admin accounts interactively")
+    sub.add_parser("work", help="Process pending analyses once, for cron on shared hosting")
     serve = sub.add_parser("serve", help="Start the website and its analysis queue")
     serve.add_argument("--host", default="127.0.0.1")
     serve.add_argument("--port", default=8000, type=int)
@@ -47,6 +48,12 @@ def main():
         except ValueError as exc:
             parser.exit(1, f"{exc} No accounts changed.\n")
         print("Two admin accounts saved. Start with: python -m tradingagents.web serve")
+        return
+
+    if args.command == "work":
+        from .worker import drain_queue
+
+        drain_queue(app.config["DATABASE"])
         return
 
     from filelock import FileLock, Timeout

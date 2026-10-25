@@ -1,6 +1,7 @@
 """Serial durable queue, with each upstream graph isolated in a subprocess."""
 
 import json
+import signal
 import subprocess
 import sys
 import threading
@@ -168,6 +169,37 @@ class QueueRunner:
 
 def start_queue(path):
     return QueueRunner(path)
+
+
+def drain_queue(path):
+    """Run pending jobs from cron; overlapping invocations exit without changes."""
+    from filelock import FileLock, Timeout
+
+    lock = FileLock(str(Path(path).parent / "server.lock"))
+    try:
+        lock.acquire(timeout=0)
+    except Timeout:
+        return False
+    stop = threading.Event()
+    previous = {}
+
+    def request_stop(signum, frame):
+        stop.set()
+
+    def launch(*args, **kwargs):
+        return run_child(*args, stop=stop, **kwargs)
+
+    try:
+        for signum in (signal.SIGTERM, signal.SIGINT):
+            previous[signum] = signal.signal(signum, request_stop)
+        recover_interrupted(path)
+        while not stop.is_set() and process_next(path, launch=launch):
+            pass
+    finally:
+        for signum, handler in previous.items():
+            signal.signal(signum, handler)
+        lock.release()
+    return True
 
 
 if __name__ == "__main__":
