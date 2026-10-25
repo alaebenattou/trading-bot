@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% block title %}New analysis{% endblock %}{% block breadcrumb %}New analysis{% endblock %}
+{% block content %}
+    <div class="page-heading">
+        <div>
+            <div class="eyebrow">FOLLOW YOUR CURIOSITY</div>
+            <h1>Put your next idea to the test.</h1>
+            <p class="muted">One ticker. Two model tiers. A team of perspectives.</p>
+        </div>
+    </div>
+    {% if error %}<div class="notice error" role="alert">{{ error }}</div>{% endif %}
+    <div class="form-layout"><form class="panel form-panel"
+      method="post"
+      action="{{ url_for('submit') }}"><input type="hidden" name="csrf" value="{{ session.csrf }}"><div class="section-number">01 <span>THE QUESTION</span></div><div class="field-grid"><div><label for="ticker">Stock ticker</label><input id="ticker"
+       name="ticker"
+       value="{{ values.get('ticker', '') }}"
+       placeholder="e.g. AAPL"
+       maxlength="20"
+       required
+       autofocus><small>Use the market ticker, including its exchange suffix if needed.</small></div><div><label for="trade_date">Analysis date</label><input id="trade_date"
+       name="trade_date"
+       type="date"
+       value="{{ values.get('trade_date',today) }}"
+       max="{{ today }}"
+       min="2000-01-01"
+       required><small>The engine requests data as of this date.</small></div></div><hr><div class="section-number">02 <span>YOUR MODEL TEAM</span></div><p class="muted">Copy model IDs from the OpenRouter catalog. You can mix providers, including DeepSeek and GLM, under one API key.</p><label for="quick_model">Analyst & debate model <span class="label-tag">QUICK TIER</span></label><input id="quick_model"
+       name="quick_model"
+       value="{{ values.get('quick_model', '') }}"
+       placeholder="provider/model-id"
+       required
+       maxlength="180"
+       autocomplete="off"><small>Technical, fundamentals, sentiment, news, research debates, and trader.</small><label for="deep_model">Research & portfolio manager model <span class="label-tag">DEEP TIER</span></label><input id="deep_model"
+       name="deep_model"
+       value="{{ values.get('deep_model', '') }}"
+       placeholder="provider/model-id"
+       required
+       maxlength="180"
+       autocomplete="off"><small>Synthesizes the research and makes the final portfolio assessment.</small><p><a href="https://openrouter.ai/models"
+   target="_blank"
+   rel="noopener noreferrer">Browse OpenRouter models <span aria-hidden="true">↗</span></a></p><hr><div class="section-number">03 <span>DEPTH OF RESEARCH</span></div><label for="rounds">Debate rounds</label><select id="rounds" name="rounds">{% for n in [1,2,3] %}<option value="{{ n }}"
+        {{ 'selected' if values.get('rounds', '1') == n|string }}>{{ n }} round{{ 's' if n > 1 }}{{ ' · Faster, lower cost' if n == 1 else ' · More discussion' }}</option>{% endfor %}</select><p class="muted small">Each run uses paid model calls and market data. More rounds increase time and cost. The server limits each model response to 4,096 output tokens and each run to 30 minutes.</p><div class="form-actions"><a class="button secondary" href="{{ url_for('dashboard') }}">Cancel</a><button class="button primary"
+        type="submit"
+        {{ 'disabled' if not key_ready }}>Start analysis <span aria-hidden="true">→</span></button></div>{% if not key_ready %}<p class="warning">An OpenRouter key is required. <a href="{{ url_for('settings') }}">View setup instructions.</a></p>{% endif %}</form><aside class="research-sidebar"><div class="eyebrow">YOUR ANALYST BENCH</div><h2>Four lenses.<br>A clearer perspective.</h2><div class="analyst"><span>01</span><div><h3>Technical</h3><p>Price action, indicators, and market structure.</p></div></div><div class="analyst"><span>02</span><div><h3>Fundamentals</h3><p>Financial health and company performance.</p></div></div><div class="analyst"><span>03</span><div><h3>Sentiment</h3><p>The conversation around the company.</p></div></div><div class="analyst"><span>04</span><div><h3>News & macro</h3><p>Headlines, catalysts, and the wider market.</p></div></div><div class="sidebar-note">Analyses run one at a time. Both admins can continue browsing while the agents work.</div></aside></div>
+{% endblock %}

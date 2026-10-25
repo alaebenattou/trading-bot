@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>{% block title %}Trading Desk{% endblock %} · Trading Desk</title><link rel="stylesheet" href="{{ url_for('static', filename='desk.css') }}"><script src="{{ url_for('static', filename='desk.js') }}" defer></script></head>
+    <body>
+        <a class="skip" href="#main">Skip to content</a>
+        {% if g.user %}
+            <aside class="sidebar">
+                <a class="brand" href="{{ url_for('dashboard') }}"><span class="brand-mark" aria-hidden="true">↗</span><span>Trading<span class="light">Desk</span><small>YOUR SHARED RESEARCH SPACE</small></span></a>
+                <div class="workspace-label">WORKSPACE <span class="tiny-badge">PRIVATE</span></div>
+                <nav aria-label="Main navigation">
+                    <a class="nav-link {{ 'active' if request.endpoint == 'dashboard' }}"
+                       href="{{ url_for('dashboard') }}"><span aria-hidden="true">▦</span> Overview</a><a class="nav-link {{ 'active' if request.endpoint in ['new','submit'] }}"
+   href="{{ url_for('new') }}"><span aria-hidden="true">＋</span> New analysis</a><a class="nav-link {{ 'active' if request.endpoint == 'settings' }}"
+   href="{{ url_for('settings') }}"><span aria-hidden="true">⚙</span> Workspace settings</a>
+                </nav>
+                <div class="sidebar-bottom">
+                    <div class="connection">
+                        <span class="dot {{ 'ready' if key_ready }}"></span>
+                        <div>OpenRouter<small>{{ 'Key configured' if key_ready else 'Setup needed' }}</small></div>
+                    </div>
+                    <div class="profile">
+                        <span class="avatar">{{ g.user[0]|upper }}</span>
+                        <div class="profile-name">{{ g.user }}<small>Workspace admin</small></div>
+                        <form method="post" action="{{ url_for('logout') }}">
+                            <input type="hidden"
+                                   name="csrf"
+                                   value="{{ session.csrf }}"><button class="icon-button"
+        title="Sign out"
+        aria-label="Sign out">↪</button>
+                        </form>
+                    </div>
+                </div>
+            </aside>
+        {% endif %}
+        <div class="{{ 'shell' if g.user else 'auth-shell' }}">
+            {% if g.user %}<header class="topbar"><span>Workspace <span class="slash">/</span> {% block breadcrumb %}Overview{% endblock %}</span><span class="top-note"><span class="dot ready"></span> Research only <span class="slash">·</span> 2 admins</span><form class="mobile-logout" method="post" action="{{ url_for('logout') }}"><input type="hidden" name="csrf" value="{{ session.csrf }}"><button class="logout-link">Sign out</button></form></header>{% endif %}
+            <main id="main" class="{{ 'content' if g.user else 'auth-content' }}">
+                {% for message in get_flashed_messages() %}<div class="notice"
+     role="status">{{ message }}</div>{% endfor %}
+                {% block content %}{% endblock %}
+            </main>
+            {% if g.user %}<footer>Built on TradingAgents by Tauric Research <span>AI-generated research. Not investment advice.</span></footer>{% endif %}
+        </div>
+    </body>
+</html>

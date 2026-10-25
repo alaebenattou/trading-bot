@@ -35,7 +35,11 @@ dev = [
     "ruff>=0.16",
     "pytest>=8.0",
     "pytest-subtests>=0.13",
+    "flask>=3.1,<4",
+    "waitress>=3.0,<4",
+    "filelock>=3.16,<4",
 ]
+web = ["flask>=3.1,<4", "waitress>=3.0,<4", "filelock>=3.16,<4"]
 # Amazon Bedrock support (AWS SigV4 auth + boto3). Optional so the core install
 # stays lean: pip install "tradingagents[bedrock]".
 bedrock = [
@@ -54,6 +58,7 @@ include = ["tradingagents*", "cli*"]
 [tool.setuptools.package-data]
 cli = ["static/*"]
 tradingagents = ["assets/*.svg"]
+"tradingagents.web" = ["templates/*.html", "static/*.css", "static/*.js"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

@@ -1,6 +1,13 @@
 .git
 .venv
 .env
+.env.enterprise
+.env.*.local
+*.sqlite3
+*.sqlite3-*
+session.key
+server.lock
+.desk-data
 .claude
 .idea
 .vscode

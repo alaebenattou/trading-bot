@@ -1,3 +1,26 @@
+# Trading Bot · Shared Trading Desk
+
+A private research website for two admins, built on Tauric Research's TradingAgents.
+Run stock analyses with separate OpenRouter models for analysts and managers, share
+saved reports, and download the research as Markdown. No live order execution.
+
+**[Website setup and deployment →](docs/shared-desk.md)**
+
+```bash
+pip install -e '.[web]'
+python -m tradingagents.web setup
+python -m tradingagents.web serve
+```
+
+Open http://127.0.0.1:8000. The setup command creates your two admin accounts;
+there are no default passwords. Add `OPENROUTER_API_KEY` to your server's `.env`
+when ready to run analyses. The website can be set up and browsed without a key.
+
+Original engine documentation and attribution follow. The upstream Apache 2.0
+license and Git history are preserved.
+
+---
+
 <p align="center">
   <img src="tradingagents/assets/tauric-logo.svg" width="60%" alt="Tauric Research">
 </p>

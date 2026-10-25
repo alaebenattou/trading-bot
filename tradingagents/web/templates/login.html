@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block title %}Sign in{% endblock %}
+{% block content %}
+    <div class="login-layout">
+        <section class="login-story">
+            <div class="eyebrow">A WORKSPACE FOR TWO</div>
+            <h1>
+                A second opinion.
+                <br>
+                A shared perspective.
+            </h1>
+            <p>Bring a team of AI analysts to your research. Compare the evidence, debate the risks, and build your own conviction.</p>
+            <div class="story-line"><span class="dot ready"></span> Independent agents. One place to think.</div>
+            <div class="story-grid" aria-hidden="true">
+                <span>01
+                    <br>
+                    <b>Analyze</b></span><span>02
+                        <br>
+                        <b>Debate</b></span><span>03
+                            <br>
+                            <b>Decide</b></span>
+                    </div>
+                    <small>POWERED BY TRADINGAGENTS · YOUR MODELS, YOUR RESEARCH</small>
+                </section>
+                <section class="login-card">
+                    <a class="brand"
+                       href="{{ url_for('login') }}"><span class="brand-mark" aria-hidden="true">↗</span>Trading<span class="light">Desk</span></a>
+                    <h2>Welcome back</h2>
+                    <p class="muted">Sign in to your private research workspace.</p>
+                    {% if error %}<div class="notice error" role="alert">{{ error }}</div>{% endif %}
+                {% if configured %}<form method="post"><input type="hidden" name="csrf" value="{{ session.csrf }}"><label for="username">Username</label><input id="username"
+       name="username"
+       autocomplete="username"
+       required
+       autofocus
+       maxlength="80"
+       placeholder="Your admin username"><label for="password">Password</label><input id="password"
+       name="password"
+       type="password"
+       autocomplete="current-password"
+       required
+       placeholder="Enter your password"><button class="button primary full" type="submit">Sign in <span aria-hidden="true">→</span></button></form><p class="login-note">Invite-only access. Two admins, one workspace.</p>
+            {% else %}<div class="notice">Your workspace is ready for setup. On the server, run <code>python -m tradingagents.web setup</code> to create your two admin accounts.</div>{% endif %}
+        </section>
+    </div>
+{% endblock %}

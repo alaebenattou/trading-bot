@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block title %}{{ run.ticker }} research{% endblock %}{% block breadcrumb %}Research / {{ run.ticker }}{% endblock %}
+{% block content %}
+    <div class="page-heading"><div><div class="eyebrow">SHARED RESEARCH / {{ run.trade_date }}</div><h1>{{ run.ticker }} <span class="muted">research</span></h1><p class="muted">Started by {{ run.creator }} · {{ run.created[:16]|replace('T', ' ') }} UTC</p></div><div class="heading-actions"><span class="badge {{ run.status }}">{{ run.status|capitalize }}</span>{% if run.status == "completed" %}<a class="button secondary"
+   href="{{ url_for('download',run_id=run.id) }}">Download report <span aria-hidden="true">↓</span></a>{% endif %}</div></div>
+    {% if run.status in ["queued","running"] %}<section class="panel progress-panel"
+         data-status-url="{{ url_for('run_status', run_id=run.id) }}"
+         data-status="{{ run.status }}"><div class="eyebrow">{{ 'IN THE QUEUE' if run.status == 'queued' else 'RESEARCH IN PROGRESS' }}</div><h2>{{ 'Your analyst team is up next.' if run.status == 'queued' else 'The agents are weighing the evidence.' }}</h2><p class="muted">{{ 'The workspace runs one analysis at a time.' if run.status == 'queued' else 'Research, debate, and risk review can take several minutes.' }} This page updates automatically. Your report will be saved even if you leave.</p><p class="small muted" role="status" id="poll-message">Checking status every 5 seconds.</p><div class="progress-track"><span></span></div></section>{% elif run.status == "failed" %}<div class="notice error" role="alert"><strong>Analysis could not finish.</strong><br>{{ run.error }}</div><a class="button secondary" href="{{ url_for('new') }}">Start another analysis</a>{% endif %}
+    <div class="run-details">
+        <div><span class="stat-label">ANALYST MODEL</span><strong>{{ run.quick_model }}</strong></div>
+        <div><span class="stat-label">MANAGER MODEL</span><strong>{{ run.deep_model }}</strong></div>
+        <div><span class="stat-label">DEBATE ROUNDS</span><strong>{{ run.rounds }}</strong></div>
+        <div><span class="stat-label">FINAL RATING</span><strong class="rating">{{ run.signal or 'Pending' }}</strong></div>
+    </div>
+    {% if run.status == "completed" %}<div class="report-layout"><nav class="report-nav" aria-label="Report sections"><div class="eyebrow">IN THIS REPORT</div>{% for key, title in sections.items() %}{% if reports.get(key) %}<a href="#{{ key }}">{{ title }}</a>{% endif %}{% endfor %}</nav><div>{% for key, title in sections.items() %}{% if reports.get(key) %}<section class="panel report-section" id="{{ key }}"><div class="eyebrow">{{ title }}</div><div class="prose">{{ reports[key]|markdown }}</div></section>{% endif %}{% endfor %}<p class="muted small">AI-generated research can contain errors. Review sources and form your own judgment.</p></div></div>{% endif %}
+{% endblock %}
