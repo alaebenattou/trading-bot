@@ -28,13 +28,28 @@ from werkzeug.security import check_password_hash, generate_password_hash
 from .store import connect, initialize
 
 REPORT_SECTIONS = {
-    "final_trade_decision": "Portfolio decision",
-    "market_report": "Technical analysis",
-    "fundamentals_report": "Fundamentals",
-    "sentiment_report": "Market sentiment",
-    "news_report": "News & macro",
-    "investment_plan": "Research synthesis",
-    "trader_investment_plan": "Trading proposal",
+    "final_trade_decision": "Décision de portefeuille",
+    "market_report": "Analyse technique",
+    "fundamentals_report": "Fondamentaux",
+    "sentiment_report": "Sentiment du marché",
+    "news_report": "Actualité et macroéconomie",
+    "investment_plan": "Synthèse de la recherche",
+    "trader_investment_plan": "Proposition de transaction",
+}
+
+STATUS_LABELS = {
+    "queued": "En attente",
+    "running": "En cours",
+    "completed": "Terminée",
+    "failed": "Échec",
+}
+RATING_LABELS = {
+    "Buy": "Acheter",
+    "Overweight": "Surpondérer",
+    "Hold": "Conserver",
+    "Underweight": "Sous-pondérer",
+    "Sell": "Vendre",
+    "REVIEW": "À examiner",
 }
 
 
@@ -64,6 +79,14 @@ def create_app(config=None):
     dummy_hash = generate_password_hash(secrets.token_hex(16))
     markdown = MarkdownIt("commonmark", {"html": False})
 
+    @app.template_filter("status_fr")
+    def status_fr(value):
+        return STATUS_LABELS.get(value, value)
+
+    @app.template_filter("rating_fr")
+    def rating_fr(value):
+        return RATING_LABELS.get(value, value) if value else "En attente"
+
     @app.template_filter("markdown")
     def render_markdown(value):
         return Markup(markdown.render(value or ""))
@@ -82,7 +105,7 @@ def create_app(config=None):
         if request.method == "POST" and not secrets.compare_digest(
             session["csrf"].encode(), request.form.get("csrf", "").encode()
         ):
-            abort(400, "Your form expired. Reload the page and try again.")
+            abort(400, "Votre formulaire a expiré. Rechargez la page et réessayez.")
         if request.endpoint not in {"login", "static"} and not g.user:
             return redirect(url_for("login"))
         return None
@@ -123,7 +146,7 @@ def create_app(config=None):
                     0
                 ]
                 if attempts >= 5:
-                    error, status = "Too many attempts. Try again in 15 minutes.", 429
+                    error, status = "Trop de tentatives. Réessayez dans 15 minutes.", 429
                 else:
                     # Reserve an attempt inside the transaction to prevent parallel bypass.
                     db.execute("INSERT INTO attempts VALUES (?, ?)", (ip, now))
@@ -141,7 +164,7 @@ def create_app(config=None):
                     )
                     session.permanent = True
                     return redirect(url_for("dashboard"))
-                error, status = "Username or password is incorrect.", 401
+                error, status = "Identifiant ou mot de passe incorrect.", 401
         return render_template("login.html", error=error, configured=configured), status
 
     @app.post("/logout")
@@ -171,27 +194,27 @@ def create_app(config=None):
         error = None
         try:
             if not re.fullmatch(r"[A-Z0-9^][A-Z0-9.^=-]{0,19}", ticker):
-                raise ValueError("Enter a valid stock ticker, such as AAPL or BRK-B.")
+                raise ValueError("Saisissez un symbole boursier valide, comme AAPL ou BRK-B.")
             parsed = date.fromisoformat(day)
             if parsed > date.today() or parsed < date(2000, 1, 1):
-                raise ValueError("Choose an analysis date between 2000 and today.")
+                raise ValueError("Choisissez une date d’analyse entre 2000 et aujourd’hui.")
             for model in (quick, deep):
                 if not re.fullmatch(r"[A-Za-z0-9_.-]+/[A-Za-z0-9_.:/-]{1,150}", model):
                     raise ValueError(
-                        "Enter an OpenRouter model ID in provider/model format for each tier."
+                        "Saisissez un identifiant de modèle OpenRouter au format fournisseur/modèle pour chaque niveau."
                     )
             rounds = int(values.get("rounds", "1"))
             if rounds not in (1, 2, 3):
-                raise ValueError("Choose 1, 2 or 3 debate rounds.")
+                raise ValueError("Choisissez 1, 2 ou 3 tours de débat.")
             if not os.getenv("OPENROUTER_API_KEY"):
                 raise ValueError(
-                    "Add OPENROUTER_API_KEY on the server before starting an analysis."
+                    "Ajoutez OPENROUTER_API_KEY sur le serveur avant de lancer une analyse."
                 )
         except ValueError as exc:
             error = (
                 str(exc)
                 if str(exc) and not str(exc).startswith(("Invalid isoformat", "invalid literal"))
-                else "Check the date and debate rounds."
+                else "Vérifiez la date et le nombre de tours de débat."
             )
         if error:
             return render_template("new.html", values=values, error=error), 400
@@ -207,7 +230,7 @@ def create_app(config=None):
                 return render_template(
                     "new.html",
                     values=values,
-                    error="The queue is full. Wait for an analysis to finish.",
+                    error="La file d’attente est pleine. Attendez qu’une analyse se termine.",
                 ), 429
             db.execute(
                 """INSERT INTO runs
@@ -224,7 +247,9 @@ def create_app(config=None):
                     datetime.now(UTC).isoformat(),
                 ),
             )
-        flash("Analysis queued. You can leave this page while the agents work.")
+        flash(
+            "Analyse ajoutée à la file d’attente. Vous pouvez quitter cette page pendant le travail des agents."
+        )
         return redirect(url_for("report", run_id=run_id))
 
     def get_run(run_id):
@@ -253,16 +278,20 @@ def create_app(config=None):
     def download(run_id):
         run = get_run(run_id)
         if run["status"] != "completed":
-            abort(409, "This report is not complete yet.")
+            abort(409, "Ce rapport n’est pas encore terminé.")
         reports = json.loads(run["reports"] or "{}")
-        text = f"# {run['ticker']} · {run['trade_date']}\n\nRating: {run['signal']}\n\n"
-        text += f"Analyst model: {run['quick_model']}\nManager model: {run['deep_model']}\n\n"
+        text = f"# {run['ticker']} · {run['trade_date']}\n\nRecommandation : {rating_fr(run['signal'])}\n\n"
+        text += (
+            f"Modèle d’analyse : {run['quick_model']}\nModèle de gestion : {run['deep_model']}\n\n"
+        )
         text += "\n\n".join(
             f"## {title}\n\n{reports[key]}"
             for key, title in REPORT_SECTIONS.items()
             if reports.get(key)
         )
-        text += "\n\n---\nAI-generated research. Not investment advice.\n"
+        text += (
+            "\n\n---\nAnalyse générée par IA. Ceci ne constitue pas un conseil en investissement.\n"
+        )
         return Response(
             text,
             mimetype="text/markdown",
@@ -280,6 +309,25 @@ def create_app(config=None):
     @app.errorhandler(409)
     @app.errorhandler(413)
     def error_page(error):
-        return render_template("error.html", error=error), error.code
+        titles = {
+            400: "Requête invalide",
+            404: "Page introuvable",
+            409: "Rapport indisponible",
+            413: "Formulaire trop volumineux",
+        }
+        descriptions = {
+            400: "Vérifiez les informations saisies et réessayez.",
+            404: "La page ou l’analyse demandée est introuvable.",
+            409: "Ce rapport n’est pas encore disponible.",
+            413: "Les données envoyées dépassent la taille autorisée.",
+        }
+        description = (
+            descriptions[error.code]
+            if error.description == type(error).description
+            else error.description
+        )
+        return render_template(
+            "error.html", error=error, error_title=titles[error.code], error_description=description
+        ), error.code
 
     return app

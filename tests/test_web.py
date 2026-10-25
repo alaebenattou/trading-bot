@@ -173,6 +173,8 @@ def test_key_never_rendered_and_security_headers(client):
     for path in ["/", "/settings", "/new"]:
         response = client.get(path)
         assert response.status_code == 200
+        assert b'lang="fr"' in response.data
+        assert "Tableau de bord" in response.get_data(as_text=True)
         assert b"test-key-never-render" not in response.data
         assert response.headers["Cache-Control"] == "no-store"
         assert "frame-ancestors 'none'" in response.headers["Content-Security-Policy"]

@@ -1,46 +1,46 @@
 {% extends "base.html" %}
-{% block title %}Sign in{% endblock %}
+{% block title %}Se connecter{% endblock %}
 {% block content %}
     <div class="login-layout">
         <section class="login-story">
-            <div class="eyebrow">A WORKSPACE FOR TWO</div>
+            <div class="eyebrow">UN ESPACE POUR VOUS DEUX</div>
             <h1>
-                A second opinion.
+                Un second avis.
                 <br>
-                A shared perspective.
+                Une vision partagée.
             </h1>
-            <p>Bring a team of AI analysts to your research. Compare the evidence, debate the risks, and build your own conviction.</p>
-            <div class="story-line"><span class="dot ready"></span> Independent agents. One place to think.</div>
+            <p>Une équipe d’analystes IA pour éclairer vos recherches. Comparez les faits, confrontez les risques et forgez votre propre opinion.</p>
+            <div class="story-line"><span class="dot ready"></span> Des agents indépendants. Un espace pour réfléchir.</div>
             <div class="story-grid" aria-hidden="true">
                 <span>01
                     <br>
-                    <b>Analyze</b></span><span>02
+                    <b>Analyser</b></span><span>02
                         <br>
-                        <b>Debate</b></span><span>03
+                        <b>Débattre</b></span><span>03
                             <br>
-                            <b>Decide</b></span>
+                            <b>Décider</b></span>
                     </div>
-                    <small>POWERED BY TRADINGAGENTS · YOUR MODELS, YOUR RESEARCH</small>
+                    <small>AVEC TRADINGAGENTS · VOS MODÈLES, VOS ANALYSES</small>
                 </section>
                 <section class="login-card">
                     <a class="brand"
                        href="{{ url_for('login') }}"><span class="brand-mark" aria-hidden="true">↗</span>Trading<span class="light">Desk</span></a>
-                    <h2>Welcome back</h2>
-                    <p class="muted">Sign in to your private research workspace.</p>
+                    <h2>Heureux de vous retrouver</h2>
+                    <p class="muted">Connectez-vous à votre espace privé d’analyse.</p>
                     {% if error %}<div class="notice error" role="alert">{{ error }}</div>{% endif %}
-                {% if configured %}<form method="post"><input type="hidden" name="csrf" value="{{ session.csrf }}"><label for="username">Username</label><input id="username"
+                {% if configured %}<form method="post"><input type="hidden" name="csrf" value="{{ session.csrf }}"><label for="username">Identifiant</label><input id="username"
        name="username"
        autocomplete="username"
        required
        autofocus
        maxlength="80"
-       placeholder="Your admin username"><label for="password">Password</label><input id="password"
+       placeholder="Votre identifiant administrateur"><label for="password">Mot de passe</label><input id="password"
        name="password"
        type="password"
        autocomplete="current-password"
        required
-       placeholder="Enter your password"><button class="button primary full" type="submit">Sign in <span aria-hidden="true">→</span></button></form><p class="login-note">Invite-only access. Two admins, one workspace.</p>
-            {% else %}<div class="notice">Your workspace is ready for setup. On the server, run <code>python -m tradingagents.web setup</code> to create your two admin accounts.</div>{% endif %}
+       placeholder="Saisissez votre mot de passe"><button class="button primary full" type="submit">Se connecter <span aria-hidden="true">→</span></button></form><p class="login-note">Accès privé. Deux administrateurs, un espace partagé.</p>
+            {% else %}<div class="notice">Votre espace est prêt à être configuré. Sur le serveur, exécutez <code>python -m tradingagents.web setup</code> pour créer vos deux comptes administrateurs.</div>{% endif %}
         </section>
     </div>
 {% endblock %}

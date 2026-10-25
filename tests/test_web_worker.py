@@ -48,6 +48,7 @@ def test_execute_real_pipeline_boundary(tmp_path):
     assert captured["quick_think_llm"] == "deepseek/test"
     assert captured["deep_think_llm"] == "z-ai/test"
     assert captured["max_tokens"] == 4096
+    assert captured["output_language"] == "French"
     assert captured["max_debate_rounds"] == 1
 
 
@@ -88,7 +89,7 @@ def test_restart_recovers_interrupted(tmp_path):
         db.execute("UPDATE runs SET status='running'")
     recover_interrupted(path)
     assert row(path)["status"] == "failed"
-    assert "restarted" in row(path)["error"]
+    assert "redémarré" in row(path)["error"]
 
 
 def test_shutdown_reaps_running_child():

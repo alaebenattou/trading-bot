@@ -13,8 +13,8 @@ from .app import REPORT_SECTIONS
 from .store import connect
 
 FAILURE = (
-    "The analysis stopped before a report was ready. Check the server API key, "
-    "OpenRouter credits, model IDs and tool-calling support, then try a new run."
+    "L’analyse s’est arrêtée avant la création du rapport. Vérifiez la clé API du serveur, "
+    "les crédits OpenRouter, les identifiants des modèles et la prise en charge des outils, puis relancez une analyse."
 )
 
 
@@ -31,7 +31,7 @@ def recover_interrupted(path):
         db.execute(
             "UPDATE runs SET status='failed', error=?, finished=? WHERE status='running'",
             (
-                "The server restarted during this analysis. Start a new run to try again.",
+                "Le serveur a redémarré pendant cette analyse. Lancez une nouvelle analyse pour réessayer.",
                 datetime.now(UTC).isoformat(),
             ),
         )
@@ -52,6 +52,7 @@ def execute_run(path, run_id, graph_factory=None):
     root = Path(path).parent / "engine"
     config.update(
         llm_provider="openrouter",
+        output_language="French",
         backend_url="https://openrouter.ai/api/v1",
         quick_think_provider="openrouter",
         deep_think_provider="openrouter",
@@ -102,17 +103,19 @@ def process_next(path, launch=subprocess.run):
         finish_failure(
             path,
             run_id,
-            "This analysis reached the 30 minutes time limit. Try fewer debate rounds or a faster model.",
+            "Cette analyse a atteint la limite de 30 minutes. Essayez moins de tours de débat ou un modèle plus rapide.",
         )
     except InterruptedError:
         finish_failure(
-            path, run_id, "The server stopped during this analysis. Start a new run to try again."
+            path,
+            run_id,
+            "Le serveur s’est arrêté pendant cette analyse. Lancez une nouvelle analyse pour réessayer.",
         )
     except OSError:
         finish_failure(
             path,
             run_id,
-            "The server could not start the analysis process. Check its Python installation.",
+            "Le serveur n’a pas pu lancer le processus d’analyse. Vérifiez son installation Python.",
         )
     return True
 

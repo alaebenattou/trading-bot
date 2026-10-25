@@ -7,16 +7,16 @@ if (progress) {
     if (stopped) return;
     try {
       const response = await fetch(progress.dataset.statusUrl, {redirect: 'error'});
-      if (!response.ok) throw new Error('Unable to check status');
+      if (!response.ok) throw new Error('Impossible de vérifier le statut');
       const run = await response.json();
       if (run.status !== progress.dataset.status) {
         stopped = true;
         location.reload();
         return;
       }
-      message.textContent = 'Checking status every 5 seconds.';
+      message.textContent = 'Actualisation du statut toutes les 5 secondes.';
     } catch (_) {
-      message.textContent = 'Connection interrupted or session expired. Refresh to check again.';
+      message.textContent = 'Connexion interrompue ou session expirée. Actualisez la page pour réessayer.';
     }
     setTimeout(check, 5000);
   };
@@ -25,6 +25,6 @@ if (progress) {
 document.querySelectorAll('form').forEach(form => {
   form.addEventListener('submit', () => {
     const button = form.querySelector('button[type="submit"]');
-    if (button) { button.disabled = true; button.textContent = 'Working…'; }
+    if (button) { button.disabled = true; button.textContent = 'Veuillez patienter…'; }
   });
 });

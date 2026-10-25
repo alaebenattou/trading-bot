@@ -1,6 +1,6 @@
 # Shared Trading Desk
 
-A private website for two administrators to run stock research and read shared reports. It uses the original TradingAgents pipeline, with OpenRouter as the model gateway. There is no broker integration or live trading.
+A private website for two administrators to run stock research and read shared reports. The complete web interface is in French, and new analyses request French report output. It uses the original TradingAgents pipeline, with OpenRouter as the model gateway. There is no broker integration or live trading.
 
 ## Local setup
 
