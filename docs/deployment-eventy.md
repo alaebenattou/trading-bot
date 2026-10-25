@@ -1,6 +1,6 @@
 # Déploiement sur eventy.click
 
-État vérifié le 25/10/2026 : application installée, moteur importable, deux comptes migrés et authentification vérifiée, file cron configurée. Le serveur web atteint l’application (contrôle HEAD : 200, CSP et cookie Secure présents). Le DNS public pointe encore vers le parking Namecheap et le certificat du domaine reste à activer après sa correction. La mise en ligne publique n’est donc pas encore validée.
+État vérifié le 25/10/2026 : application installée, moteur importable, deux comptes migrés et authentification vérifiée, file cron configurée. Le serveur web atteint l’application (contrôle HEAD : 200, CSP et cookie Secure présents). Les serveurs Namecheap Web Hosting DNS et Google DNS renvoient maintenant 199.188.200.9 pour le domaine et son alias www ; certains caches renvoient encore l’ancien parking. Le certificat du domaine reste à activer. La mise en ligne publique n’est donc pas encore validée.
 
 Le site utilise le compte SSH `aglcode`, sur un hébergement mutualisé CloudLinux/cPanel/LiteSpeed. Python 3.12 et Passenger servent les pages ; un processus cron séparé traite les analyses.
 
@@ -17,14 +17,16 @@ SQLite contient les comptes et les rapports. Aucun serveur MySQL/PostgreSQL n’
 
 ## DNS et certificat
 
-Dans Namecheap Advanced DNS, configurer :
+Dans le compte Namecheap, Domain List → eventy.click → Manage → Nameservers doit utiliser **Namecheap Web Hosting DNS** (`dns1.namecheaphosting.com` et `dns2.namecheaphosting.com`). Les enregistrements suivants sont ensuite gérés dans **cPanel Zone Editor** :
 
 | Type | Hôte | Valeur |
 | --- | --- | --- |
 | A | `@` | `199.188.200.9` |
 | CNAME | `www` | `eventy.click` |
 
-Remplacer les entrées de parking/redirection contradictoires. Ne pas modifier les enregistrements mail. Après propagation, activer/vérifier le certificat pour `eventy.click` et `www.eventy.click` via cPanel SSL/TLS Status (AutoSSL). Vérifier sans ignorer les erreurs de certificat :
+Ne pas modifier les enregistrements mail. Après propagation, activer/vérifier le certificat pour `eventy.click` et `www.eventy.click` via **cPanel → Namecheap SSL**. Dans « Ready for installation », cliquer sur « Install » si proposé, puis attendre le statut « Active ». Le compte SSH mutualisé ne peut pas exécuter l’outil AutoSSL réservé à root ; l’API cPanel CLI est également indisponible dans son environnement cloisonné. Voir le [guide officiel Namecheap SSL](https://www.namecheap.com/support/knowledgebase/article.aspx/9387/2218/what-is-namecheap-ssl-and-how-do-i-use-it/).
+
+Vérifier sans ignorer les erreurs de certificat :
 
 ```bash
 curl -I https://eventy.click/login
